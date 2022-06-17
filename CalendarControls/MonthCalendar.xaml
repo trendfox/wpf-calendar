@@ -1,0 +1,203 @@
+﻿<UserControl x:Class="CalendarControls.MonthCalendar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CalendarControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             UseLayoutRounding="True">
+    <UserControl.Resources>
+        <Style x:Key="titleTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="24" />
+        </Style>
+
+        <Style x:Key="calendarTextStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="4 2" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+
+        <Style x:Key="pageButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="16 4" />
+        </Style>
+    </UserControl.Resources>
+
+    <UserControl.CommandBindings>
+        <CommandBinding Command="{x:Static local:CalendarCommands.ActivateDay}" Executed="ActivateDay_Executed" />
+        <CommandBinding Command="{x:Static local:CalendarCommands.ActivateEvent}" Executed="ActivateEvent_Executed" />
+    </UserControl.CommandBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+       
+        <Grid Margin="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <Button Grid.Column="0"
+                    Name="btnPreviousMonth"
+                    Content="&lt;"
+                    Style="{StaticResource pageButtonStyle}"
+                    Click="btnPreviousMonth_Click" />
+            <TextBlock Grid.Column="1" Style="{StaticResource titleTextStyle}">
+                <Run Text="{Binding Date, StringFormat=MMMM, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <Run Text="{Binding Date, StringFormat=yyyy, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            </TextBlock>
+            <Button Grid.Column="2"
+                    Name="btnNextMonth"
+                    Content="&gt;"
+                    Style="{StaticResource pageButtonStyle}"
+                    Click="btnNextMonth_Click" />
+        </Grid>
+
+        <ItemsControl Name="icItems" Grid.Row="1">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid IsItemsHost="True"
+                          local:GridEx.RowCount="{Binding WeeksThisMonth, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemContainerStyle>
+                <Style>
+                    <Setter Property="Grid.Column"
+                            Value="{Binding CalendarColumn}" />
+                    <Setter Property="Grid.Row"
+                            Value="{Binding CalendarRow}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Name="brdDay"
+                            Background="#cccccc"
+                            BorderBrush="Gray"
+                            BorderThickness="1,1,0,0">
+
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0"
+                                       Text="{Binding Text}"
+                                       Style="{StaticResource calendarTextStyle}" />
+
+                            <!-- Transparent button to handle day click -->
+                            <Button Grid.Row="0"
+                                    Grid.RowSpan="2"
+                                    Content=""
+                                    Opacity="0"
+                                    Command="{x:Static local:CalendarCommands.ActivateDay}"
+                                    CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}" />
+
+                            <!-- ItemsControl for events -->
+                            <ItemsControl Grid.Row="1" ItemsSource="{Binding Events}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Grid IsItemsHost="True"
+                                              local:GridEx.RowCount="{Binding MaxEventRows, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                        </Grid>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type local:EventViewModel}">
+                                        <Border Name="brdEvent"
+                                                Background="{Binding Color}"
+                                                Margin="-1,1,0,1"><!-- -1 to overlap border -->
+                                            <Grid>
+                                                <TextBlock Text="{Binding Title}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="4 0"/>
+                                                <!-- Transparent overlay button to handle event click -->
+                                                <Button Opacity="0"
+                                                        Command="{x:Static local:CalendarCommands.ActivateEvent}"
+                                                        CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}" />
+                                            </Grid>
+                                        </Border>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsFirst}" Value="True">
+                                                <Setter TargetName="brdEvent" Property="CornerRadius" Value="10,0,0,10" />
+                                                <Setter TargetName="brdEvent" Property="Margin" Value="3,1,0,1" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                                <Setter TargetName="brdEvent" Property="CornerRadius" Value="0,10,10,0" />
+                                                <Setter TargetName="brdEvent" Property="Margin" Value="-1,1,3,1" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style>
+                                        <Setter Property="Grid.Row"
+                                                Value="{Binding EventRow}"/>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+
+                    <!-- Triggers to apply colors to current date, and dates outside of current month -->
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding IsWeekend}"
+                                     Value="true">
+                            <Setter TargetName="brdDay"
+                                    Property="Background"
+                                    Value="#faa" />
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding IsInMonth}"
+                                     Value="false">
+                            <Setter TargetName="brdDay"
+                                    Property="Background"
+                                    Value="#eeeeee" />
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding IsToday}"
+                                     Value="true">
+                            <Setter TargetName="brdDay"
+                                    Property="Background"
+                                    Value="LightBlue" />
+                        </DataTrigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsInMonth}" Value="False" />
+                                <Condition Binding="{Binding IsWeekend}" Value="True" />
+                            </MultiDataTrigger.Conditions>
+
+                            <Setter TargetName="brdDay"
+                                    Property="Background"
+                                    Value="#fcc" />
+                        </MultiDataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>
