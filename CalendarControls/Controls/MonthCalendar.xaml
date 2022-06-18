@@ -8,19 +8,25 @@
              d:DesignHeight="450" d:DesignWidth="800"
              UseLayoutRounding="True">
     <UserControl.Resources>
-        <Style x:Key="titleTextStyle" TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="24" />
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/ButtonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
-        <Style x:Key="calendarTextStyle" TargetType="TextBlock">
-            <Setter Property="Margin" Value="4 2" />
-            <Setter Property="HorizontalAlignment" Value="Left" />
-        </Style>
+            <Style x:Key="titleTextStyle" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="FontSize" Value="24" />
+            </Style>
 
-        <Style x:Key="pageButtonStyle" TargetType="Button">
-            <Setter Property="Padding" Value="16 4" />
-        </Style>
+            <Style x:Key="calendarTextStyle" TargetType="TextBlock">
+                <Setter Property="Margin" Value="4 2" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+            </Style>
+
+            <Style x:Key="pageButtonStyle" TargetType="Button">
+                <Setter Property="Padding" Value="16 4" />
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <UserControl.CommandBindings>
@@ -91,88 +97,84 @@
                             BorderBrush="Gray"
                             BorderThickness="1,1,0,0">
 
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            
-                            <TextBlock Grid.Row="0"
+                        <Button Style="{StaticResource contentOnlyButtonStyle}"
+                                Command="{x:Static local:CalendarCommands.ActivateDay}"
+                                CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0"
                                        Text="{Binding Text}"
                                        Style="{StaticResource calendarTextStyle}" />
 
-                            <!-- Transparent button to handle day click -->
-                            <Button Grid.Row="0"
-                                    Grid.RowSpan="2"
-                                    Content=""
-                                    Opacity="0"
-                                    Command="{x:Static local:CalendarCommands.ActivateDay}"
-                                    CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    CommandParameter="{Binding}" />
+                                <!-- ItemsControl for events -->
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding Events}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Grid IsItemsHost="True"
+                                                  local:GridEx.RowCount="{Binding MaxEventRows, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                            </Grid>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
 
-                            <!-- ItemsControl for events -->
-                            <ItemsControl Grid.Row="1" ItemsSource="{Binding Events}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <Grid IsItemsHost="True"
-                                              local:GridEx.RowCount="{Binding MaxEventRows, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                        </Grid>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type local:EventViewModel}">
-                                        <Border Name="brdEvent"
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type local:EventViewModel}">
+                                            <Border Name="brdEvent"
                                                 Background="{Binding Color}"
-                                                Margin="-1,1,0,1"><!-- -1 to overlap border -->
-                                            <Grid>
-                                                <TextBlock Text="{Binding Title}"
-                                                           VerticalAlignment="Center"
-                                                           Margin="4 0"/>
-                                                <!-- Transparent overlay button to handle event click -->
-                                                <Button Opacity="0"
+                                                Margin="-1,1,0,1">
+                                                <!-- -1 to overlap border -->
+                                                <Button Style="{StaticResource contentOnlyButtonStyle}"
                                                         Command="{x:Static local:CalendarCommands.ActivateEvent}"
                                                         CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}" />
-                                            </Grid>
-                                        </Border>
-                                        <DataTemplate.Triggers>
-                                            
-                                            <DataTrigger Binding="{Binding IsFirst}" Value="True">
-                                                <Setter TargetName="brdEvent" Property="CornerRadius" Value="10,0,0,10" />
-                                                <Setter TargetName="brdEvent" Property="Margin" Value="3,1,0,1" />
-                                            </DataTrigger>
-                                            
-                                            <DataTrigger Binding="{Binding IsLast}" Value="True">
-                                                <Setter TargetName="brdEvent" Property="CornerRadius" Value="0,10,10,0" />
-                                                <Setter TargetName="brdEvent" Property="Margin" Value="-1,1,3,1" />
-                                            </DataTrigger>
+                                                        CommandParameter="{Binding}">
+                                                    
+                                                    <TextBlock Text="{Binding Title}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="4 0"/>
+                                                </Button>
+                                            </Border>
+                                            <DataTemplate.Triggers>
 
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding IsFirst}" Value="True" />
-                                                    <Condition Binding="{Binding IsLast}" Value="True" />
-                                                </MultiDataTrigger.Conditions>
+                                                <DataTrigger Binding="{Binding IsFirst}" Value="True">
+                                                    <Setter TargetName="brdEvent" Property="CornerRadius" Value="10,0,0,10" />
+                                                    <Setter TargetName="brdEvent" Property="Margin" Value="3,1,0,1" />
+                                                </DataTrigger>
 
-                                                <Setter TargetName="brdEvent" Property="CornerRadius" Value="10,10,10,10" />
-                                                <Setter TargetName="brdEvent" Property="Margin" Value="3,1,3,1" />
-                                            </MultiDataTrigger>
-                                        
-                                        </DataTemplate.Triggers>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
+                                                <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                                    <Setter TargetName="brdEvent" Property="CornerRadius" Value="0,10,10,0" />
+                                                    <Setter TargetName="brdEvent" Property="Margin" Value="-1,1,3,1" />
+                                                </DataTrigger>
 
-                                <ItemsControl.ItemContainerStyle>
-                                    <Style>
-                                        <Setter Property="Grid.Row"
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsFirst}" Value="True" />
+                                                        <Condition Binding="{Binding IsLast}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+
+                                                    <Setter TargetName="brdEvent" Property="CornerRadius" Value="10,10,10,10" />
+                                                    <Setter TargetName="brdEvent" Property="Margin" Value="3,1,3,1" />
+                                                </MultiDataTrigger>
+
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+
+                                    <ItemsControl.ItemContainerStyle>
+                                        <Style>
+                                            <Setter Property="Grid.Row"
                                                 Value="{Binding EventRow}"/>
-                                    </Style>
-                                </ItemsControl.ItemContainerStyle>
-                            </ItemsControl>
-                        </Grid>
+                                        </Style>
+                                    </ItemsControl.ItemContainerStyle>
+                                </ItemsControl>
+                            </Grid>
+                        </Button>
                     </Border>
 
                     <!-- Triggers to apply colors to current date, and dates outside of current month -->
