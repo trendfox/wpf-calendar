@@ -108,6 +108,7 @@
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0"
+                                           x:Name="tbDayTitle"
                                        Text="{Binding Text}"
                                        Style="{StaticResource calendarTextStyle}" />
 
@@ -195,6 +196,9 @@
 
                         <DataTrigger Binding="{Binding IsToday}"
                                      Value="true">
+                            <Setter TargetName="tbDayTitle"
+                                    Property="FontWeight"
+                                    Value="Bold" />
                             <Setter TargetName="brdDay"
                                     Property="Background"
                                     Value="LightBlue" />
