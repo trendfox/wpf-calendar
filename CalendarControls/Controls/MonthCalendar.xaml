@@ -39,14 +39,14 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-       
+
         <Grid Margin="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            
+
             <Button Grid.Column="0"
                     Name="btnPreviousMonth"
                     Content="&lt;"
@@ -109,8 +109,8 @@
 
                                 <TextBlock Grid.Row="0"
                                            x:Name="tbDayTitle"
-                                       Text="{Binding Text}"
-                                       Style="{StaticResource calendarTextStyle}" />
+                                           Text="{Binding Text}"
+                                           Style="{StaticResource calendarTextStyle}" />
 
                                 <!-- ItemsControl for events -->
                                 <ItemsControl Grid.Row="1" ItemsSource="{Binding Events}">
@@ -128,17 +128,17 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type local:EventViewModel}">
                                             <Border Name="brdEvent"
-                                                Background="{Binding Color}"
-                                                Margin="-1,1,0,1">
+                                                    Background="{Binding Color}"
+                                                    Margin="-1,1,0,1">
                                                 <!-- -1 to overlap border -->
                                                 <Button Style="{StaticResource contentOnlyButtonStyle}"
                                                         Command="{x:Static local:CalendarCommands.ActivateEvent}"
                                                         CommandTarget="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}">
-                                                    
+
                                                     <TextBlock Text="{Binding Title}"
-                                                           VerticalAlignment="Center"
-                                                           Margin="4 0"/>
+                                                               VerticalAlignment="Center"
+                                                               Margin="4 0"/>
                                                 </Button>
                                             </Border>
                                             <DataTemplate.Triggers>
@@ -170,7 +170,7 @@
                                     <ItemsControl.ItemContainerStyle>
                                         <Style>
                                             <Setter Property="Grid.Row"
-                                                Value="{Binding EventRow}"/>
+                                                    Value="{Binding EventRow}"/>
                                         </Style>
                                     </ItemsControl.ItemContainerStyle>
                                 </ItemsControl>
